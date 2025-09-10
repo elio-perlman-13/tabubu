@@ -1,17 +1,68 @@
-File name: A-n44-k6.vrp
+File: A-n45-k7.vrp
 Best solution found:
-Route 1: 0 33 10 11 37 42 32 21 5 24 15 0 
-Load: 100, Duration: 209.223
-Route 2: 0 31 19 27 28 7 0 
-Load: 88, Duration: 98.3002
-Route 3: 0 2 41 14 13 38 9 36 22 0 
-Load: 93, Duration: 142.686
-Route 4: 0 8 25 40 43 29 6 0 
-Load: 100, Duration: 157.701
-Route 5: 0 4 34 26 16 20 18 35 1 30 23 39 17 12 3 0 
-Load: 189, Duration: 263.325
-Total Cost: 871.236
+Route 1: 0 21 27 29 31 33 39 0 
+Load: 91, Duration: 194.637
+Route 2: 0 1 37 30 19 36 5 0 
+Load: 100, Duration: 245.448
+Route 3: 0 24 14 22 10 9 0 
+Load: 89, Duration: 169.11
+Route 4: 0 32 8 15 42 25 23 17 38 0 
+Load: 98, Duration: 161.754
+Route 5: 0 13 18 7 16 20 40 0 
+Load: 63, Duration: 106.224
+Route 6: 0 2 6 28 3 11 43 41 44 0 
+Load: 100, Duration: 217.259
+Route 7: 0 35 34 26 4 12 0 
+Load: 93, Duration: 83.6296
+Total Cost: 1178.06
 
-Optimal value (if known): 937
-Accuracy gap: N/A
-Elapsed time: 2.72707 seconds
+Optimal value (if known): 1146
+Accuracy gap: 2.79772%
+Elapsed time: 49.4522 seconds
+
+File: A-n80-k10.vrp
+Best solution found:
+Route 1: 0 49 58 32 4 22 45 50 0 
+Load: 93, Duration: 193.254
+Route 2: 0 36 66 67 70 54 9 72 76 38 0 
+Load: 97, Duration: 205.327
+Route 3: 0 42 64 15 47 19 26 35 65 69 56 55 33 53 0 
+Load: 97, Duration: 279.288
+Route 4: 0 3 60 46 25 41 39 77 51 0 
+Load: 98, Duration: 174.873
+Route 5: 0 73 31 75 57 20 17 74 0 
+Load: 95, Duration: 211.232
+Route 6: 0 30 78 8 68 43 16 61 59 27 29 0 
+Load: 96, Duration: 231.735
+Route 7: 0 13 12 44 5 6 23 0 
+Load: 85, Duration: 154.717
+Route 8: 0 62 24 37 2 34 11 63 0 
+Load: 99, Duration: 181.485
+Route 9: 0 7 28 79 52 1 0 
+Load: 100, Duration: 162.641
+Route 10: 0 40 21 14 18 48 71 10 0 
+Load: 82, Duration: 185.509
+Total Cost: 1980.06
+
+Optimal value (if known): 1763
+Accuracy gap: 12.312%
+Elapsed time: 204.785 seconds
+
+File: A-n33-k5.vrp
+Best solution found:
+Route 1: 0 10 17 9 3 16 29 0 
+Load: 94, Duration: 193.872
+Route 2: 0 23 18 28 15 22 0 
+Load: 79, Duration: 64.9124
+Route 3: 0 11 31 1 21 14 19 6 24 0 
+Load: 98, Duration: 119.302
+Route 4: 0 20 26 7 8 13 32 2 0 
+Load: 88, Duration: 163.213
+Route 5: 0 12 30 25 27 5 4 0 
+Load: 87, Duration: 132.817
+Total Cost: 674.117
+
+Optimal value (if known): 661
+Accuracy gap: 1.98435%
+Elapsed time: 17.6674 seconds
+

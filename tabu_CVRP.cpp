@@ -37,11 +37,11 @@ int optimal_value = -1; // optimal solution value if known, else -1
 
 
 const int MAX_ITER = 2000; // max iterations for Tabu Search
-const int NMAX = 50; // for early stopping if no improvement
+const int NMAX = 100; // for early stopping if no improvement
 const int TABU_TENURE = 10; // tenure for tabu search
 
 const int NUM_NEIGHBORHOODS = 4;
-const int MAX_SEGMENT = 50;
+const int MAX_SEGMENT = 100;
 const double gamma1 = 1.0;
 const double gamma2 = 0.3;
 const double gamma3 = 0.0;
@@ -157,13 +157,37 @@ Solution generate_initial_solution(int start_idx) {
                 for (int p = 1; p < routes[k].size(); ++p)
                     duration[k] += dist[routes[k][p-1]][routes[k][p]];
             } else {
-                // Insert idx into route m (k==m) at the best infeasible position found above
-                if (best_infeas_pos == -1) best_infeas_pos = 1;
-                routes[m].insert(routes[m].begin() + best_infeas_pos, idx);
-                load[m] += demand[idx];
-                duration[m] = 0;
-                for (int p = 1; p < routes[m].size(); ++p) {
-                    duration[m] += dist[routes[m][p-1]][routes[m][p]];
+                // Find the best vehicle (route) for this customer that does not violate constraint
+                int best_vehicle = -1, best_pos = -1;
+                double best_incr = 1e18;
+                for (int v = 1; v <= m; ++v) {
+                    if (load[v] + demand[idx] > Q) continue;
+                    for (int pos = 1; pos < routes[v].size(); ++pos) {
+                        int prev = routes[v][pos-1];
+                        int next = routes[v][pos];
+                        double delta = dist[prev][idx] + dist[idx][next] - dist[prev][next];
+                        if (delta < best_incr) {
+                            best_incr = delta;
+                            best_vehicle = v;
+                            best_pos = pos;
+                        }
+                    }
+                }
+                if (best_vehicle != -1 && best_pos != -1) {
+                    routes[best_vehicle].insert(routes[best_vehicle].begin() + best_pos, idx);
+                    load[best_vehicle] += demand[idx];
+                    duration[best_vehicle] = 0;
+                    for (int p = 1; p < routes[best_vehicle].size(); ++p)
+                        duration[best_vehicle] += dist[routes[best_vehicle][p-1]][routes[best_vehicle][p]];
+                } else {
+                    // If no feasible vehicle found, insert into route m at best infeasible position
+                    if (best_infeas_pos == -1) best_infeas_pos = 1;
+                    routes[m].insert(routes[m].begin() + best_infeas_pos, idx);
+                    load[m] += demand[idx];
+                    duration[m] = 0;
+                    for (int p = 1; p < routes[m].size(); ++p) {
+                        duration[m] += dist[routes[m][p-1]][routes[m][p]];
+                    }
                 }
             }
         }
@@ -307,10 +331,13 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
                     }
                     else continue;
                 }
-                if (load[route_i] > Q || neighbor.load[route_j] > Q) {
-                    continue;
+                for (int k = 1; k <= m; k++) {
+                    if (neighbor.load[k] > Q) {
+                        neighbor.total_cost = 1e18; // Infeasible solution
+                        break;
+                    }
                 }
-                else {
+                {
                     //check tabu and aspiration criteria
                     bool is_tabu = (tabu_list_swap[i][j] >= current_iter);
                     if (is_tabu && neighbor.total_cost >= best_cost) continue;
@@ -339,15 +366,18 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
         int best_i = -1;
         int best_j = -1;
         for (int k = 1; k <= m; k++){
-            if (sol.routes[k].size() <= 3) continue;
-            for (int i = 1; i < sol.routes[k].size() - 2; i++) {
-                for (int j = i + 1; j < sol.routes[k].size() - 1; j++) {
+            int route_size = (int)sol.routes[k].size();
+            if (route_size <= 3) continue;
+            for (int i = 1; i < route_size - 2; i++) {
+                for (int j = i + 1; j < route_size - 1; j++) {
+                    // Bounds check for reverse
+                    if (i < 1 || j >= route_size - 1 || i > j) continue;
                     Solution neighbor = sol;
                     // Perform 2-opt: reverse segment
                     reverse(neighbor.routes[k].begin() + i, neighbor.routes[k].begin() + j + 1);
                     // Recalculate duration for this route from scratch
                     neighbor.duration[k] = 0;
-                    for (int p = 1; p < neighbor.routes[k].size(); ++p)
+                    for (int p = 1; p < (int)neighbor.routes[k].size(); ++p)
                         neighbor.duration[k] += dist[neighbor.routes[k][p-1]][neighbor.routes[k][p]];
                     // Recalculate total cost from scratch
                     neighbor.total_cost = 0;
@@ -355,8 +385,10 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
                         neighbor.total_cost += neighbor.duration[kk];
 
                     // Check tabu and aspiration criteria
-                    bool is_tabu = (tabu_list_2_opt[k][i][j] >= current_iter);
-                    if (is_tabu && neighbor.total_cost >= best_cost) continue;
+                    if (k < (int)tabu_list_2_opt.size() && i < (int)tabu_list_2_opt[k].size() && j < (int)tabu_list_2_opt[k][i].size()) {
+                        bool is_tabu = (tabu_list_2_opt[k][i][j] >= current_iter);
+                        if (is_tabu && neighbor.total_cost >= best_cost) continue;
+                    }
                     if (neighbor.total_cost < best_neighbor_cost) {
                         best_neighbor_cost = neighbor.total_cost;
                         best_neighbor = neighbor;
@@ -367,7 +399,7 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
                 }
             }
         }
-        if (best_k != -1 && best_i != -1 && best_j != -1) {
+        if (best_k != -1 && best_i != -1 && best_j != -1 && best_k < (int)tabu_list_2_opt.size() && best_i < (int)tabu_list_2_opt[best_k].size() && best_j < (int)tabu_list_2_opt[best_k][best_i].size()) {
             tabu_list_2_opt[best_k][best_i][best_j] = current_iter + TABU_TENURE * m;
         }
 //        cout << "2-opt Move: " << best_i << " " << best_j << " in Route " << best_k << endl;
@@ -380,8 +412,10 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
         for (int i = 1; i <= n; i++){
             int route_i = sol.customer_vehicle[i];
             int pos_i = find(sol.routes[route_i].begin(), sol.routes[route_i].end(), i) - sol.routes[route_i].begin();
-            int before_i = sol.routes[route_i][pos_i-1];
-            int after_i  = sol.routes[route_i][pos_i+1];
+            // Bounds check for pos_i
+            if (route_i < 1 || route_i > m) continue;
+            if (pos_i < 0 || pos_i >= (int)sol.routes[route_i].size()) continue;
+            if ((int)sol.routes[route_i].size() <= 2) continue; // route must have at least depot, i, depot
             for (int k = 1; k <= m; k++) {
                 if (k == route_i) continue;
                 if (sol.load[k] + demand[i] > Q) continue;
@@ -390,7 +424,7 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
                 // Find optimal position to insert customer i into route k
                 int best_pos = -1;
                 double best_insertion_cost = 1e18;
-                for (int pos = 1; pos < neighbor.routes[k].size(); pos++) {
+                for (int pos = 1; pos < (int)neighbor.routes[k].size(); pos++) {
                     // Calculate cost of relocating customer i to position pos in route k
                     double delta_j = dist[neighbor.routes[k][pos - 1]][i] + dist[i][neighbor.routes[k][pos]]
                                      - dist[neighbor.routes[k][pos - 1]][neighbor.routes[k][pos]];
@@ -400,23 +434,38 @@ Solution find_best_neighbor(Solution sol, int neighbor_id, int current_iter, dou
                     }
                 }
                 if (best_pos != -1) {
-                    // Perform relocation
-                    neighbor.routes[k].insert(neighbor.routes[k].begin() + best_pos, i);
-                    neighbor.routes[route_i].erase(neighbor.routes[route_i].begin() + pos_i);
+                    // Perform relocation with bounds check
+                    if (best_pos >= 0 && best_pos <= (int)neighbor.routes[k].size()) {
+                        neighbor.routes[k].insert(neighbor.routes[k].begin() + best_pos, i);
+                    } else {
+                        continue;
+                    }
+                    if (pos_i >= 0 && pos_i < (int)neighbor.routes[route_i].size()) {
+                        neighbor.routes[route_i].erase(neighbor.routes[route_i].begin() + pos_i);
+                    } else {
+                        continue;
+                    }
                     neighbor.customer_vehicle[i] = k;
                     neighbor.load[route_i] -= demand[i];
                     neighbor.load[k] += demand[i];
                     // Recalculate duration for both affected routes from scratch
                     neighbor.duration[route_i] = 0;
-                    for (int p = 1; p < neighbor.routes[route_i].size(); ++p)
+                    for (int p = 1; p < (int)neighbor.routes[route_i].size(); ++p)
                         neighbor.duration[route_i] += dist[neighbor.routes[route_i][p-1]][neighbor.routes[route_i][p]];
                     neighbor.duration[k] = 0;
-                    for (int p = 1; p < neighbor.routes[k].size(); ++p)
+                    for (int p = 1; p < (int)neighbor.routes[k].size(); ++p)
                         neighbor.duration[k] += dist[neighbor.routes[k][p-1]][neighbor.routes[k][p]];
                     // Recalculate total cost from scratch
                     neighbor.total_cost = 0;
                     for (int kk = 1; kk <= m; ++kk)
                         neighbor.total_cost += neighbor.duration[kk];
+
+                    for (int kk = 1; kk <= m; kk++) {
+                        if (neighbor.load[kk] > Q) {
+                            neighbor.total_cost = 1e18; // Infeasible solution
+                            break;
+                        }
+                    }
 
                     // Check tabu and aspiration criteria
                     bool is_tabu = (tabu_list_relocate[k][i] >= current_iter);
@@ -459,102 +508,111 @@ Solution tabu_search(Solution sol, int max_iter, int max_segment, int nmax) {
     Solution current_sol = sol;
     
 
-    for (int segment = 1; segment <= max_segment; segment++) {
-        if (segment_seeds[segment - 1] >= n) segment_seeds[segment - 1] = segment_seeds[segment - 1] % n;
-        if (segment_seeds[segment - 1] == 0) segment_seeds[segment - 1] = 1;
-        Solution current_sol = generate_initial_solution(segment_seeds[segment - 1]);
-//        cout << "Starting segment " << segment << endl;
-//        cout << "Initial solution:" << endl;
-//        print_solution(current_sol);
-        int iter = 1;
-        int no_improve = 0;
-        double T0 = 100.0; // initial temperature
-        double alpha = 0.995; // cooling rate
-        tabu_list_swap.resize(n + 5, vector<int>(n + 5, 0));
-        tabu_list_switch.resize(n + 5, vector<int>(n + 5, 0));
-        tabu_list_2_opt.resize(m + 5, vector<vector<int>>(n + 5, vector<int>(n + 5, 0)));
-        tabu_list_relocate.resize(m + 5, vector<int>(n + 5, 0));
-        while (iter < max_iter) {
-            //write_here
-            int current_iter[NUM_NEIGHBORHOODS] = {1, 1, 1, 1};
-            double total_weight = 0;
-            for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) total_weight += weight[i];
-            double r = ((double) rand() / RAND_MAX) * total_weight;
-            int neighbor_id = 0;
-            double acc = weight[0];
-            while (neighbor_id < NUM_NEIGHBORHOODS - 1 && r > acc) {
-                neighbor_id++;
-                acc += weight[neighbor_id];
-            }
-            count[neighbor_id]++;
-            //Find best neighbor
-//            cout << "Iteration " << iter << ", Segment " << segment << endl;
-//            cout << "Weight:" << endl;
-//            for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {
-//               cout << "Neighborhood " << i << ": " << weight[i] << endl;
-//            }
-//            cout << "Selected Neighborhood: " << neighbor_id << endl;
-            Solution neighbor = find_best_neighbor(current_sol, neighbor_id, current_iter[neighbor_id], best_cost);
-//            cout << "Best neighbor found " << endl;
-//            print_solution(neighbor);
-            //Update score
-            if (neighbor.total_cost < best_cost) {
-                best_cost = neighbor.total_cost;
-                best_solution = neighbor;
-                score[neighbor_id] += gamma1;
-                no_improve = 0;
-            }
-            else if (neighbor.total_cost < current_sol.total_cost) {
-                score[neighbor_id] += gamma2;
-                no_improve = 0;
-            }
-            else {
-                score[neighbor_id] += gamma3;
-                no_improve++;
-            }
 
-            // Update tabu list
-            current_iter[neighbor_id]++;
-
-            // Early stopping: stop if no improvement for nmax iterations
-            if (no_improve >= nmax) {
-                break;
-            }
-
-            if (neighbor.total_cost < current_sol.total_cost) {
-                current_sol = neighbor;
-            } else {
-                // Simulated Annealing: accept worse solution with probability
-                double T = T0 * pow(alpha, iter);
-                double delta = neighbor.total_cost - current_sol.total_cost;
-                if (T > 1e-8 && exp(-delta / T) > ((double) rand() / RAND_MAX)) {
-                    current_sol = neighbor;
+        // Helper: check if a solution is feasible (all routes feasible, all customers visited once)
+        auto is_solution_feasible = [](const Solution& sol) -> bool {
+            vector<bool> customer_visited(n+1, false);
+            for (int k = 1; k <= m; ++k) {
+                int load_k = sol.load[k];
+                const vi& route = sol.routes[k];
+                if (route.size() < 2) continue;
+                if (route.front() != 0 || route.back() != 0) return false;
+                if (load_k > Q) return false;
+                for (int i = 1; i < (int)route.size() - 1; ++i) {
+                    int cust = route[i];
+                    if (cust == 0) return false;
+                    if (customer_visited[cust]) return false;
+                    customer_visited[cust] = true;
                 }
             }
-            iter++;
-        }
-        // Update weights using scores
-        for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {
-            if (count[i] == 0) {
-                // If neighborhood not used, keep previous weight
-                weight[i] = weight[i];
-            } else {
-                // (1-gamma4)*weight[i] + gamma4*(score[i]/count[i])
-                weight[i] = (1.0 - gamma4) * weight[i] + gamma4 * (score[i] / count[i]);
+            for (int i = 1; i <= n; ++i) if (!customer_visited[i]) return false;
+            return true;
+        };
+
+        for (int segment = 1; segment <= max_segment; segment++) {
+            Solution best_segment_solution = current_sol;
+            double best_segment_cost = current_sol.total_cost;
+            // Generate initial solution for this segment using the seed
+            if (segment_seeds[segment - 1] >= n) segment_seeds[segment - 1] = segment_seeds[segment - 1] % n;
+            if (segment_seeds[segment - 1] == 0) segment_seeds[segment - 1] = 1;
+            Solution current_sol = generate_initial_solution(segment_seeds[segment - 1]);
+            int iter = 1;
+            int no_improve = 0;
+            double T0 = 100.0; // initial temperature
+            double alpha = 0.995; // cooling rate
+            tabu_list_swap.resize(n + 5, vector<int>(n + 5, 0));
+            tabu_list_switch.resize(n + 5, vector<int>(n + 5, 0));
+            tabu_list_2_opt.resize(m + 5, vector<vector<int>>(n + 5, vector<int>(n + 5, 0)));
+            tabu_list_relocate.resize(m + 5, vector<int>(n + 5, 0));
+            while (iter < max_iter) {
+                int current_iter[NUM_NEIGHBORHOODS] = {1, 1, 1, 1};
+                double total_weight = 0;
+                for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) total_weight += weight[i];
+                double r = ((double) rand() / RAND_MAX) * total_weight;
+                int neighbor_id = 0;
+                double acc = weight[0];
+                while (neighbor_id < NUM_NEIGHBORHOODS - 1 && r > acc) {
+                    neighbor_id++;
+                    acc += weight[neighbor_id];
+                }
+                count[neighbor_id]++;
+                Solution neighbor = find_best_neighbor(current_sol, neighbor_id, current_iter[neighbor_id], best_cost);
+                // Update score
+                if (neighbor.total_cost < best_segment_cost) {
+                    best_segment_cost = neighbor.total_cost;
+                    best_segment_solution = neighbor;
+                    no_improve = 0;
+                }
+                if (neighbor.total_cost < best_cost) {
+                    score[neighbor_id] += gamma1;
+                    no_improve = 0;
+                }
+                else if (neighbor.total_cost < current_sol.total_cost) {
+                    score[neighbor_id] += gamma2;
+                    no_improve = 0;
+                }
+                else {
+                    score[neighbor_id] += gamma3;
+                    no_improve++;
+                }
+                current_iter[neighbor_id]++;
+                if (no_improve >= nmax) {
+                    break;
+                }
+                if (neighbor.total_cost < current_sol.total_cost) {
+                    current_sol = neighbor;
+                } else {
+                    double T = T0 * pow(alpha, iter);
+                    double delta = neighbor.total_cost - current_sol.total_cost;
+                    if (T > 1e-8 && exp(-delta / T) > ((double) rand() / RAND_MAX)) {
+                        current_sol = neighbor;
+                    }
+                }
+                iter++;
+            }
+            // Only update best_solution if segment solution is feasible
+            if (is_solution_feasible(best_segment_solution) && best_segment_cost < best_cost) {
+                best_cost = best_segment_cost;
+                best_solution = best_segment_solution;
+            }
+            // Update weights using scores
+            for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {
+                if (count[i] == 0) {
+                    weight[i] = weight[i];
+                } else {
+                    weight[i] = (1.0 - gamma4) * weight[i] + gamma4 * (score[i] / count[i]);
+                }
+            }
+            double sum_weights = 0.0;
+            for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) sum_weights += weight[i];
+            if (sum_weights > 0) {
+                for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) weight[i] /= sum_weights;
+            }
+            for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {
+                score[i] = 0.0;
+                count[i] = 1;
             }
         }
-        // Normalize weights so that their sum is 1
-        double sum_weights = 0.0;
-        for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) sum_weights += weight[i];
-        if (sum_weights > 0) {
-            for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) weight[i] /= sum_weights;
-        }
-        for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {
-            score[i] = 0.0;
-            count[i] = 1;
-        }
-//        cout << "End of segment " << segment << ", best cost so far: " << best_cost << endl;
-    }
 
     return best_solution;
 }
@@ -596,6 +654,31 @@ void input(){
             dimension = stoi(line.substr(line.find(":") + 1));
         } else if (line.find("CAPACITY") != string::npos) {
             capacity = stoi(line.substr(line.find(":") + 1));
+        } else if (line.find("trucks") != string::npos || line.find("vehicles") != string::npos) {
+            // Try to read number of vehicles after 'No of trucks' or 'VEHICLE'
+            std::istringstream iss(line);
+            std::string token;
+            int found = 0;
+            while (iss >> token) {
+                if (isdigit(token[0])) {
+                    m = stoi(token);
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) {
+                // Try to read next line if not found in this line
+                std::string nextline;
+                if (getline(cin, nextline)) {
+                    std::istringstream iss2(nextline);
+                    while (iss2 >> token) {
+                        if (isdigit(token[0])) {
+                            m = stoi(token);
+                            break;
+                        }
+                    }
+                }
+            }
         } else if (line.find("NODE_COORD_SECTION") != string::npos) {
             for (int i = 0; i < dimension; ++i) {
                 int idx, x, y;
@@ -616,7 +699,7 @@ void input(){
     }
     n = dimension - 1; // customers (excluding depot)
     Q = capacity;
-    m = 5; // or set from file/comment if needed
+    if (m <= 0) m = 5; // fallback if not found
     loc.resize(n + 1);
     demand.resize(n + 1);
     // File uses 1-based indexing, 1 is depot
@@ -629,7 +712,6 @@ void input(){
 
 
 void output(){
-    cout << "File name: A-n44-k6.vrp" << endl;
     Solution dummy=generate_initial_solution(1);
     Solution best_sol = tabu_search(dummy, MAX_ITER, MAX_SEGMENT, NMAX);
     cout << "Best solution found:" << endl;
@@ -642,14 +724,44 @@ void output(){
         cout << "Accuracy gap: N/A" << endl;
 }
 
-int main(){
-    freopen("data/A-n44-k6.vrp", "r", stdin);
-    freopen("output.txt", "w", stdout);
-    auto start = chrono::high_resolution_clock::now();
-    input();
-    init();
-    output();
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << " seconds" << endl;
+int main() {
+    namespace fs = std::filesystem;
+    std::ofstream fout("output.txt");
+    for (const auto& entry : fs::directory_iterator("data")) {
+        if (!entry.is_regular_file()) continue;
+        std::string fname = entry.path().filename().string();
+        if (fname.size() < 4 || fname.substr(fname.size() - 4) != ".vrp") continue;
+        std::ifstream fin(entry.path());
+        if (!fin) continue;
+        // Clear all global state before processing a new file
+        dist.clear();
+        demand.clear();
+        loc.clear();
+        routes.clear();
+        load.clear();
+        duration.clear();
+        tabu_list_swap.clear();
+        tabu_list_switch.clear();
+        tabu_list_2_opt.clear();
+        tabu_list_relocate.clear();
+        angle_customer.clear();
+        closest_neighbors.clear();
+        freq.clear();
+        optimal_value = -1;
+        n = 0; m = 0; Q = 0; depot = 0;
+        std::cin.rdbuf(fin.rdbuf());
+        std::ostringstream buffer;
+        std::streambuf* old_cout = std::cout.rdbuf(buffer.rdbuf());
+        auto start = chrono::high_resolution_clock::now();
+        input();
+        init();
+        output();
+        auto end = chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed = end - start;
+        std::cout << "Elapsed time: " << elapsed.count() << " seconds" << std::endl;
+        std::cout.rdbuf(old_cout);
+        fout << "File: " << fname << std::endl;
+        fout << buffer.str() << std::endl;
+    }
+    return 0;
 }
