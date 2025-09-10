@@ -1,10 +1,17 @@
-Route 1: 0 1 3 7 11 13 17 5 15 18 0 
-Load: 45, Duration: 86.3388
-Route 2: 0 14 6 10 20 4 2 8 0 
-Load: 49, Duration: 88.5834
-Route 3: 0 16 19 9 12 0 
-Load: 26, Duration: 64.6017
-Route 4: 
-Load: 0, Duration: 0
-Total Cost: 239.524
+File name: A-n44-k6.vrp
+Best solution found:
+Route 1: 0 33 10 11 37 42 32 21 5 24 15 0 
+Load: 100, Duration: 209.223
+Route 2: 0 31 19 27 28 7 0 
+Load: 88, Duration: 98.3002
+Route 3: 0 2 41 14 13 38 9 36 22 0 
+Load: 93, Duration: 142.686
+Route 4: 0 8 25 40 43 29 6 0 
+Load: 100, Duration: 157.701
+Route 5: 0 4 34 26 16 20 18 35 1 30 23 39 17 12 3 0 
+Load: 189, Duration: 263.325
+Total Cost: 871.236
 
+Optimal value (if known): 937
+Accuracy gap: N/A
+Elapsed time: 2.72707 seconds
