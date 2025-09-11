@@ -1,68 +1,138 @@
 File: A-n45-k7.vrp
 Best solution found:
-Route 1: 0 21 27 29 31 33 39 0 
-Load: 91, Duration: 194.637
-Route 2: 0 1 37 30 19 36 5 0 
-Load: 100, Duration: 245.448
-Route 3: 0 24 14 22 10 9 0 
-Load: 89, Duration: 169.11
-Route 4: 0 32 8 15 42 25 23 17 38 0 
-Load: 98, Duration: 161.754
-Route 5: 0 13 18 7 16 20 40 0 
-Load: 63, Duration: 106.224
-Route 6: 0 2 6 28 3 11 43 41 44 0 
-Load: 100, Duration: 217.259
-Route 7: 0 35 34 26 4 12 0 
-Load: 93, Duration: 83.6296
-Total Cost: 1178.06
+Route 1: 0 40 7 16 20 17 38 13 0 
+Load: 69, Duration: 147.075
+Route 2: 0 21 24 11 3 28 12 0 
+Load: 85, Duration: 177.555
+Route 3: 0 35 39 34 26 4 0 
+Load: 84, Duration: 70.1872
+Route 4: 0 44 27 29 41 43 6 2 0 
+Load: 100, Duration: 222.669
+Route 5: 0 14 33 31 36 19 5 0 
+Load: 96, Duration: 195.729
+Route 6: 0 9 22 30 37 1 42 8 0 
+Load: 100, Duration: 220.499
+Route 7: 0 18 23 25 15 10 32 0 
+Load: 100, Duration: 161.763
+Total Cost: 1195.48
 
 Optimal value (if known): 1146
-Accuracy gap: 2.79772%
-Elapsed time: 49.4522 seconds
+Accuracy gap: 4.31732%
+Elapsed time: 13.2183 seconds
+
+File: A-n44-k6.vrp
+Best solution found:
+Route 1: 0 40 1 35 18 30 23 12 0 
+Load: 93, Duration: 205.291
+Route 2: 0 34 26 10 11 16 20 39 0 
+Load: 89, Duration: 199.058
+Route 3: 0 19 33 21 32 42 37 4 0 
+Load: 99, Duration: 186.782
+Route 4: 0 7 28 27 5 24 15 8 31 0 
+Load: 100, Duration: 136.602
+Route 5: 0 2 41 14 13 38 9 36 22 0 
+Load: 93, Duration: 142.686
+Route 6: 0 6 43 29 25 3 17 0 
+Load: 96, Duration: 133.369
+Total Cost: 1003.79
+
+Optimal value (if known): 937
+Accuracy gap: 7.12787%
+Elapsed time: 13.4179 seconds
 
 File: A-n80-k10.vrp
 Best solution found:
-Route 1: 0 49 58 32 4 22 45 50 0 
-Load: 93, Duration: 193.254
-Route 2: 0 36 66 67 70 54 9 72 76 38 0 
-Load: 97, Duration: 205.327
-Route 3: 0 42 64 15 47 19 26 35 65 69 56 55 33 53 0 
-Load: 97, Duration: 279.288
-Route 4: 0 3 60 46 25 41 39 77 51 0 
-Load: 98, Duration: 174.873
-Route 5: 0 73 31 75 57 20 17 74 0 
-Load: 95, Duration: 211.232
-Route 6: 0 30 78 8 68 43 16 61 59 27 29 0 
-Load: 96, Duration: 231.735
-Route 7: 0 13 12 44 5 6 23 0 
-Load: 85, Duration: 154.717
-Route 8: 0 62 24 37 2 34 11 63 0 
-Load: 99, Duration: 181.485
-Route 9: 0 7 28 79 52 1 0 
-Load: 100, Duration: 162.641
-Route 10: 0 40 21 14 18 48 71 10 0 
-Load: 82, Duration: 185.509
-Total Cost: 1980.06
+Route 1: 0 73 36 66 67 42 0 
+Load: 63, Duration: 89.091
+Route 2: 0 58 32 4 22 45 50 76 70 0 
+Load: 99, Duration: 194.587
+Route 3: 0 53 33 55 9 54 72 38 49 0 
+Load: 91, Duration: 215.317
+Route 4: 0 3 60 46 25 41 69 56 15 64 77 0 
+Load: 98, Duration: 226.655
+Route 5: 0 13 74 17 31 19 26 35 65 47 39 51 0 
+Load: 99, Duration: 259.501
+Route 6: 0 23 57 75 20 59 27 29 0 
+Load: 95, Duration: 210.499
+Route 7: 0 12 44 5 61 16 43 68 78 30 21 0 
+Load: 97, Duration: 224.999
+Route 8: 0 7 52 2 37 8 6 0 
+Load: 100, Duration: 202.411
+Route 9: 0 40 1 63 11 34 24 62 0 
+Load: 100, Duration: 162.28
+Route 10: 0 10 71 28 79 18 48 14 0 
+Load: 100, Duration: 189.952
+Total Cost: 1975.29
 
 Optimal value (if known): 1763
-Accuracy gap: 12.312%
-Elapsed time: 204.785 seconds
+Accuracy gap: 12.0414%
+Elapsed time: 45.9144 seconds
 
 File: A-n33-k5.vrp
 Best solution found:
-Route 1: 0 10 17 9 3 16 29 0 
-Load: 94, Duration: 193.872
-Route 2: 0 23 18 28 15 22 0 
-Load: 79, Duration: 64.9124
+Route 1: 0 15 17 9 3 16 29 0 
+Load: 92, Duration: 184.175
+Route 2: 0 23 18 28 22 0 
+Load: 61, Duration: 46.624
 Route 3: 0 11 31 1 21 14 19 6 24 0 
 Load: 98, Duration: 119.302
-Route 4: 0 20 26 7 8 13 32 2 0 
-Load: 88, Duration: 163.213
-Route 5: 0 12 30 25 27 5 4 0 
-Load: 87, Duration: 132.817
-Total Cost: 674.117
+Route 4: 0 4 12 5 26 7 8 13 32 20 0 
+Load: 95, Duration: 184.373
+Route 5: 0 10 30 25 27 2 0 
+Load: 100, Duration: 140.242
+Total Cost: 674.716
 
 Optimal value (if known): 661
-Accuracy gap: 1.98435%
-Elapsed time: 17.6674 seconds
+Accuracy gap: 2.07511%
+Elapsed time: 4.35101 seconds
+
+File: A-n55-k9.vrp
+Best solution found:
+Route 1: 0 21 5 53 40 16 38 32 0 
+Load: 93, Duration: 135.676
+Route 2: 0 43 35 9 49 39 47 0 
+Load: 99, Duration: 175.419
+Route 3: 0 1 45 6 8 0 
+Load: 99, Duration: 124.855
+Route 4: 0 23 52 24 44 50 48 18 0 
+Load: 95, Duration: 146.579
+Route 5: 0 41 28 13 54 29 0 
+Load: 78, Duration: 104.387
+Route 6: 0 4 7 30 22 27 19 25 0 
+Load: 95, Duration: 123.28
+Route 7: 0 26 14 46 20 31 42 0 
+Load: 86, Duration: 79.619
+Route 8: 0 12 33 34 17 3 37 0 
+Load: 99, Duration: 79.1138
+Route 9: 0 36 2 51 11 15 10 0 
+Load: 95, Duration: 138.828
+Total Cost: 1107.76
+
+Optimal value (if known): 1073
+Accuracy gap: 3.23921%
+Elapsed time: 27.0314 seconds
+
+File: A-n62-k8.vrp
+Best solution found:
+Route 1: 0 20 40 57 32 6 61 0 
+Load: 76, Duration: 136.536
+Route 2: 0 59 55 26 50 17 58 33 34 0 
+Load: 98, Duration: 218.368
+Route 3: 0 28 56 31 49 35 4 11 25 60 14 0 
+Load: 89, Duration: 210.675
+Route 4: 0 15 53 12 13 1 54 9 5 48 0 
+Load: 99, Duration: 158.038
+Route 5: 0 21 41 23 27 39 3 42 30 18 0 
+Load: 100, Duration: 224.207
+Route 6: 0 45 47 24 46 19 38 0 
+Load: 100, Duration: 177.465
+Route 7: 0 52 2 44 22 37 16 36 0 
+Load: 96, Duration: 131.619
+Route 8: 0 7 29 43 8 10 51 0 
+Load: 75, Duration: 115.919
+Total Cost: 1372.83
+
+Optimal value (if known): 1288
+Accuracy gap: 6.58595%
+Elapsed time: 28.5908 seconds
 
